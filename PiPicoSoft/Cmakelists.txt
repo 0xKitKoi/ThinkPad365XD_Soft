@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 3.13)
+
+set(PICO_BOARD pico_w)
+
+# Copy pico_sdk_import.cmake from $PICO_SDK_PATH/external into this folder first.
+include(pico_sdk_import.cmake)
+
+project(picomodem C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+pico_sdk_init()
+
+add_executable(picomodem main.c)
+
+target_include_directories(picomodem PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+target_compile_definitions(picomodem PRIVATE
+    WIFI_SSID=\"${WIFI_SSID}\"
+    WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+)
+
+target_link_libraries(picomodem
+    pico_stdlib
+    hardware_uart
+    pico_cyw43_arch_lwip_threadsafe_background
+)
+
+# UART0 belongs to the modem, so debug prints go out over USB instead.
+pico_enable_stdio_usb(picomodem 1)
+pico_enable_stdio_uart(picomodem 0)
+
+pico_add_extra_outputs(picomodem)
